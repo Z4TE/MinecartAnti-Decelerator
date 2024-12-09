@@ -1,7 +1,6 @@
 package org.z4te.minecartAntiDecelerator;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Minecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,7 +10,8 @@ import org.bukkit.util.Vector;
 
 public final class Main extends JavaPlugin implements Listener {
 
-    private static final double DECELERATION_MODIFIER = 0.9;
+    private static final double DECELERATION_MODIFIER = 0.98;
+    private static final double MIN_ACCELERATION_THRESHOLD = 0.05;
 
     @Override
     public void onEnable() {
@@ -30,14 +30,18 @@ public final class Main extends JavaPlugin implements Listener {
     public void onMinecartMove(VehicleMoveEvent event) {
         if (event.getVehicle() instanceof Minecart minecart){
 
-            if (minecart.getLocation().getBlock().getType() == Material.RAIL
-            || minecart.getLocation().getBlock().getType() == Material.POWERED_RAIL
-            || minecart.getLocation().getBlock().getType() == Material.DETECTOR_RAIL
-            || minecart.getLocation().getBlock().getType() == Material.ACTIVATOR_RAIL) {
-                Vector velocity = minecart.getVelocity();
+            Vector currentVelocity = minecart.getVelocity();
+            Vector previousVelocity = new Vector(
+                    event.getFrom().getX() - event.getTo().getX(),
+                    event.getFrom().getY() - event.getTo().getY(),
+                    event.getFrom().getZ() - event.getTo().getZ()
+            );
 
-                velocity.multiply(DECELERATION_MODIFIER);
-                minecart.setVelocity(velocity);
+            double acceleration = currentVelocity.distance(previousVelocity);
+
+            if (acceleration < MIN_ACCELERATION_THRESHOLD) {
+                currentVelocity.multiply(DECELERATION_MODIFIER);
+                minecart.setVelocity(currentVelocity);
             }
         }
     }
