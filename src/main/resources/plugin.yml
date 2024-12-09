@@ -1,0 +1,4 @@
+name: MinecartAnti-Decelerator
+version: '1.0'
+main: org.z4te.minecartAntiDecelerator.Main
+api-version: '1.21'
