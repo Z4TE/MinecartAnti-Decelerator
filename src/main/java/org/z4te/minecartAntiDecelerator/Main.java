@@ -43,7 +43,7 @@ public final class Main extends JavaPlugin implements Listener {
         // 減速しているか確認
         if (currentVelocity.length() < previousVelocity.length()) {
             // 減速度を緩める
-            Vector adjustedVelocity = previousVelocity.multiply(0.99).add(currentVelocity.multiply(0.01));
+            Vector adjustedVelocity = previousVelocity.multiply(0.998).add(currentVelocity.multiply(0.002));
             minecart.setVelocity(adjustedVelocity);
         }
         previousSpeeds.put(minecartId, currentVelocity);
