@@ -14,10 +14,7 @@ import java.util.UUID;
 
 public final class Main extends JavaPlugin implements Listener {
 
-    private final HashMap<UUID, Vector> previousVelocities = new HashMap<>();
-
-    private static final double DECELERATION_MODIFIER = 0.99;
-    private static final double MIN_ACCELERATION_THRESHOLD = 0.02;
+    private final HashMap<UUID, Vector> previousSpeeds = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -33,22 +30,22 @@ public final class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onMinecartMove(VehicleMoveEvent event) {
-        if (event.getVehicle() instanceof Minecart minecart){
 
-            UUID minecartId = minecart.getUniqueId();
-
-            Vector currentVelocity = minecart.getVelocity();
-            Vector previousVelocity = previousVelocities.getOrDefault(minecartId, new Vector(0, 0, 0));
-
-
-            double acceleration = currentVelocity.distance(previousVelocity);
-            Bukkit.broadcastMessage(String.valueOf(acceleration));
-
-            if (acceleration > MIN_ACCELERATION_THRESHOLD) {
-                currentVelocity.multiply(DECELERATION_MODIFIER);
-                minecart.setVelocity(currentVelocity);
-            }
-
+        if (!(event.getVehicle() instanceof Minecart minecart)) {
+            return;
         }
+
+        UUID minecartId = minecart.getUniqueId();
+        Vector currentVelocity = minecart.getVelocity();
+
+        Vector previousVelocity = previousSpeeds.getOrDefault(minecartId, currentVelocity);
+
+        // 減速しているか確認
+        if (currentVelocity.length() < previousVelocity.length()) {
+            // 減速度を緩める
+            Vector adjustedVelocity = previousVelocity.multiply(0.99).add(currentVelocity.multiply(0.01));
+            minecart.setVelocity(adjustedVelocity);
+        }
+        previousSpeeds.put(minecartId, currentVelocity);
     }
 }
